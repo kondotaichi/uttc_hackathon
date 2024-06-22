@@ -1,18 +1,22 @@
 body {
-  background-color: #f5f8fa;
+  background-color: #0b0c10;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  color: #14171a;
+  color: #c5c6c7;
   margin: 0;
   padding: 0;
+  background-image: url('https://www.example.com/path-to-your-space-background.jpg');
+  background-size: cover;
+  background-attachment: fixed;
 }
 
 .app {
   max-width: 600px;
   margin: 40px auto;
   padding: 20px;
-  background-color: white;
+  background-color: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
 }
 
 .textarea {
@@ -21,30 +25,30 @@ body {
   margin-bottom: 10px;
   padding: 10px;
   border-radius: 5px;
-  border: 1px solid #ccd6dd;
+  border: 1px solid #45a29e;
   font-size: 14px;
-  color: #14171a;
-  background-color: #f5f8fa;
+  color: #c5c6c7;
+  background-color: rgba(11, 12, 16, 0.8);
 }
 
 .button {
   padding: 10px 20px;
-  background-color: #1da1f2;
-  color: white;
+  background-color: #66fcf1;
+  color: #0b0c10;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   font-size: 14px;
   font-weight: bold;
-  margin-right: 10px; /* 追加 */
+  margin-right: 10px;
 }
 
 .button:last-child {
-  margin-right: 0; /* 最後のボタンに余分なスペースを追加しない */
+  margin-right: 0;
 }
 
 .button:hover {
-  background-color: #0d8bec;
+  background-color: #45a29e;
 }
 
 .posts {
@@ -52,23 +56,24 @@ body {
 }
 
 .post {
-  border: 1px solid #e1e8ed;
+  border: 1px solid #45a29e;
   padding: 15px;
   margin-bottom: 15px;
-  background-color: white;
+  background-color: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
 }
 
 .post small {
-  color: #657786;
+  color: #66fcf1;
 }
 
 .parent-post {
   margin-bottom: 10px;
   padding: 10px;
-  background-color: #f5f8fa;
-  border-left: 4px solid #1da1f2;
+  background-color: rgba(11, 12, 16, 0.8);
+  border-left: 4px solid #66fcf1;
   border-radius: 5px;
   font-style: italic;
 }
