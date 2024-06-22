@@ -1,44 +1,50 @@
 body {
-  background-color: #0b0c10;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  color: #c5c6c7;
+  background-color: #fafafa;
+  font-family: 'Georgia', serif;
+  color: #333;
   margin: 0;
   padding: 0;
-  background-image: url('https://www.example.com/path-to-your-space-background.jpg');
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-image: url('https://www.example.com/path-to-your-paper-texture.jpg');
   background-size: cover;
-  background-attachment: fixed;
 }
 
 .app {
-  max-width: 600px;
-  margin: 40px auto;
-  padding: 20px;
-  background-color: rgba(255, 255, 255, 0.1);
+  max-width: 700px;
+  margin: 20px;
+  padding: 30px;
+  background-color: #fff;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ddd;
+  overflow: hidden;
+  font-size: 16px;
 }
 
 .textarea {
   width: 100%;
-  height: 100px;
-  margin-bottom: 10px;
-  padding: 10px;
+  height: 150px;
+  margin-bottom: 20px;
+  padding: 15px;
   border-radius: 5px;
-  border: 1px solid #45a29e;
-  font-size: 14px;
-  color: #c5c6c7;
-  background-color: rgba(11, 12, 16, 0.8);
+  border: 1px solid #ccc;
+  font-size: 16px;
+  color: #333;
+  background-color: #f9f9f9;
+  resize: none;
 }
 
 .button {
   padding: 10px 20px;
-  background-color: #66fcf1;
-  color: #0b0c10;
+  background-color: #6c757d;
+  color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
   margin-right: 10px;
 }
@@ -48,7 +54,7 @@ body {
 }
 
 .button:hover {
-  background-color: #45a29e;
+  background-color: #5a6268;
 }
 
 .posts {
@@ -56,24 +62,23 @@ body {
 }
 
 .post {
-  border: 1px solid #45a29e;
-  padding: 15px;
+  border: 1px solid #ddd;
+  padding: 20px;
   margin-bottom: 15px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: #fff;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .post small {
-  color: #66fcf1;
+  color: #6c757d;
 }
 
 .parent-post {
   margin-bottom: 10px;
   padding: 10px;
-  background-color: rgba(11, 12, 16, 0.8);
-  border-left: 4px solid #66fcf1;
+  background-color: #f9f9f9;
+  border-left: 4px solid #6c757d;
   border-radius: 5px;
   font-style: italic;
 }
