@@ -23,14 +23,25 @@ ENV MYSQL_PASSWORD=password
 ENV MYSQL_DATABASE=hackathon
 
 # Install necessary packages
-RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add ca-certificates openssh
 
 # Set the working directory
 WORKDIR /root/
 
+# Copy the Go binary from the builder stage
+COPY --from=builder /app/main .
+
 # Expose the application port
 EXPOSE 8080
 
-# Run the binary
-CMD ["./main"]
+# Expose the SSH port
+EXPOSE 22
 
+# Set root password for SSH (please change 'yourpassword' to a secure password)
+RUN echo 'root:yourpassword' | chpasswd
+
+# Allow root login via SSH
+RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+
+# Start SSH service and run the Go application
+CMD ["/bin/sh", "-c", "sshd && ./main"]
