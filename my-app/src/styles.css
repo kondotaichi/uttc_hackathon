@@ -27,21 +27,29 @@ body {
   background-color: #f5f8fa;
 }
 
+/* styles.css */
 .button {
+  padding: 6px 12px; /* ボタンのパディングを小さく */
+  font-size: 12px; /* フォントサイズを小さく */
   position: relative;
   overflow: hidden;
-  transition: background 400ms;
-  color: #fff;
-  background-color: #6200ee;
-  padding: 1rem 2rem;
-  font-family: 'Roboto', sans-serif;
-  font-size: 1.5rem;
-  outline: 0;
-  border: 0;
-  border-radius: 0.25rem;
-  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
-  cursor: pointer;
 }
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  transform: scale(0);
+  animation: ripple-animation 0.6s linear;
+}
+
+@keyframes ripple-animation {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
 
 .button:hover {
   background-color: #5000d6;
