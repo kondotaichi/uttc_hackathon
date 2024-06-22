@@ -1,26 +1,20 @@
+# syntax=docker/dockerfile:1
+
 FROM golang:1.22 as build
 
-# Set the Current Working Directory inside the container
+# 作業ディレクトリを設定
 WORKDIR /app
 
-# Copy the source code into the container
+# /appにgo.modをコピーしgo modをダウンロード
 COPY . .
 
-# Build the Go app
-RUN go mod tidy
-RUN go build -o main .
+RUN go mod download
 
-# Stage 2: A minimal Docker image to run the Go app
-FROM debian:bullseye-slim
+# go modのダウンロード、Goアプリのビルド
+RUN go build -v main.go
 
-# Set the Current Working Directory inside the container
-WORKDIR /app
-
-# Copy the Pre-built binary file from the previous stage
-COPY --from=build /app/main .
-
-# Expose port 8000 to the outside world
+# ポートを公開
 EXPOSE 8080
 
-# Command to run the executable
-CMD ["./main"]
+# コンテナ起動時に実行するコマンドを指定
+CMD ["go", "run", "main.go"]
