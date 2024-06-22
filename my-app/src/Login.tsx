@@ -22,7 +22,7 @@ const Login: React.FC<LoginProps> = ({ email, setEmail, password, setPassword, h
       value={password}
       onChange={(e) => setPassword(e.target.value)}
     />
-    <button onClick={handleLogin}>Login</button>
+    <button onClick={handleLogin}>ログインするで〜</button>
   </div>
 );
 

@@ -8,6 +8,7 @@ import (
 	"time"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"api/db"
 )
 
 func signUpHandler(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +26,7 @@ func signUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	query := "INSERT INTO Users (id, email, password_hash, nickname) VALUES (?, ?, ?, ?)"
-	_, err = db.Exec(query, user.ID, user.Email, string(hashedPassword), user.Nickname)
+	_, err = db.DB.Exec(query, user.ID, user.Email, string(hashedPassword), user.Nickname)
 	if err != nil {
 		log.Printf("Error inserting user into database: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -47,7 +48,7 @@ func createPostHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Received post request: %+v", post)
 
 	var userID string
-	err := db.QueryRow("SELECT id FROM Users WHERE id = ?", post.UserID).Scan(&userID)
+	err := db.DB.QueryRow("SELECT id FROM Users WHERE id = ?", post.UserID).Scan(&userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Println("Error validating user ID: no rows in result set for user ID:", post.UserID)
@@ -63,7 +64,7 @@ func createPostHandler(w http.ResponseWriter, r *http.Request) {
 	post.CreatedAt = time.Now()
 
 	query := "INSERT INTO Posts (id, user_id, content, created_at, is_reply, parent_id) VALUES (?, ?, ?, ?, ?, ?)"
-	_, err = db.Exec(query, post.ID, post.UserID, post.Content, post.CreatedAt, post.IsReply, post.ParentID)
+	_, err = db.DB.Exec(query, post.ID, post.UserID, post.Content, post.CreatedAt, post.IsReply, post.ParentID)
 	if err != nil {
 		log.Println("Error creating post:", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -75,7 +76,7 @@ func createPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func fetchPostsHandler(w http.ResponseWriter, r *http.Request) {
-	rows, err := db.Query(`
+	rows, err := db.DB.Query(`
         SELECT p.id, p.user_id, p.content, p.created_at, IFNULL(u.nickname, '') as nickname, 
         (SELECT COUNT(*) FROM Likes l WHERE l.post_id = p.id) as like_count, p.is_reply, IFNULL(p.parent_id, '') as parent_id,
         IFNULL((SELECT content FROM Posts WHERE id = p.parent_id), '') as parent_content
@@ -136,7 +137,7 @@ func makeLikeHandler(w http.ResponseWriter, r *http.Request) {
 	like.ID = uuid.New().String()
 
 	query := "INSERT INTO Likes (id, user_id, post_id) VALUES (?, ?, ?)"
-	_, err := db.Exec(query, like.ID, like.UserID, like.PostID)
+	_, err := db.DB.Exec(query, like.ID, like.UserID, like.PostID)
 	if err != nil {
 		log.Println("Error inserting like into database:", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

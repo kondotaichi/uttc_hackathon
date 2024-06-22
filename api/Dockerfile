@@ -16,7 +16,7 @@ RUN go build -o main .
 FROM alpine:latest
 
 # Set environment variables for MySQL
-ENV MYSQL_HOST=curricurum_db
+ENV MYSQL_HOST=unix(/cloudsql/term5-taichi-kondo:us-central1:uttc)
 ENV MYSQL_PORT=3306
 ENV MYSQL_USER=root
 ENV MYSQL_PASSWORD=password
@@ -27,9 +27,6 @@ RUN apk --no-cache add ca-certificates
 
 # Set the working directory
 WORKDIR /root/
-
-# Copy the binary from the builder stage
-COPY --from=builder /app/main .
 
 # Expose the application port
 EXPOSE 8080

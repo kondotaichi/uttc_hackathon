@@ -207,7 +207,7 @@ const App: React.FC = () => {
                     Reply
                   </button>
                   <button className="button" onClick={() => makeLike(post.id)}>
-                    Like
+                    ええやん！
                   </button>
                 </div>
                 <small>

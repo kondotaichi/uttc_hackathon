@@ -30,12 +30,12 @@ const Posts: React.FC<PostsProps> = ({ posts, userPost, setUserPost, replyTo, se
           Reply
         </button>
         <button className="button" style={{ marginLeft: "auto" }} onClick={() => makeLike(post.id)}>
-          Like
+          ええやん！
         </button>
         <small>
           Posted by {post.nickname} at {new Date(post.created_at).toLocaleString()}
         </small>
-        <p>Likes: {post.like_count}</p>
+        <p>ええやん！: {post.like_count}</p>
         {replyTo === post.id && (
           <div className="reply-section">
             <textarea
