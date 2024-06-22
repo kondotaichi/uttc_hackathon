@@ -22,7 +22,7 @@ func main() {
 	r.HandleFunc("/api/likes", handlers.MakeLikeHandler).Methods("POST")
 
 	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"https://uttc-hackathon3-lx5cqmshrq-uc.a.run.app/"},
+		AllowedOrigins: []string{"*"},
 		AllowedMethods: []string{"GET", "POST"},
 		AllowedHeaders: []string{"Content-Type"},
 	})
