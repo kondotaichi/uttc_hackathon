@@ -11,7 +11,7 @@ COPY . .
 RUN go mod download
 
 # go modのダウンロード、Goアプリのビルド
-RUN go build -v *.go
+RUN go build -v main.go
 
 # ポートを公開  
 EXPOSE 8080
