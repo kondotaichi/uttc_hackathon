@@ -1,0 +1,672 @@
+# api
+
+## Directory Structure
+
+- api/
+  - init/
+    - init.sql
+  - models.go
+  - docker-compose.yaml
+  - go.mod
+  - .DS_Store (binary file)
+  - Dockerfile
+  - handlers.go
+  - go.sum
+  - .env
+  - db/
+    - .DS_Store (binary file)
+    - db.go
+  - handlers/
+    - users.go
+    - likes.go
+    - posts.go
+  - main.go
+
+## File Contents
+
+### init/init.sql
+
+```
+CREATE TABLE Users (
+    id CHAR(36) NOT NULL PRIMARY KEY,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    nickname VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE Posts (
+    id CHAR(36) NOT NULL PRIMARY KEY,
+    user_id CHAR(36) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(id)
+);
+
+CREATE TABLE Replies (
+    id CHAR(36) NOT NULL PRIMARY KEY,
+    post_id CHAR(36) NOT NULL,
+    user_id CHAR(36) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (post_id) REFERENCES Posts(id),
+    FOREIGN KEY (user_id) REFERENCES Users(id)
+);
+
+CREATE TABLE Likes (
+    id CHAR(36) NOT NULL PRIMARY KEY,
+    post_id CHAR(36) NOT NULL,
+    user_id CHAR(36) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (post_id) REFERENCES Posts(id),
+    FOREIGN KEY (user_id) REFERENCES Users(id)
+);
+
+CREATE TABLE Follows (
+    follower_id CHAR(36) NOT NULL,
+    followee_id CHAR(36) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (follower_id, followee_id),
+    FOREIGN KEY (follower_id) REFERENCES Users(id),
+    FOREIGN KEY (followee_id) REFERENCES Users(id)
+);
+```
+
+### models.go
+
+```
+package main
+
+import "time"
+
+type User struct {
+	ID       string `json:"id"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Nickname string `json:"nickname"`
+}
+
+type Post struct {
+	ID            string    `json:"id"`
+	UserID        string    `json:"user_id"`
+	Content       string    `json:"content"`
+	CreatedAt     time.Time `json:"created_at"`
+	Nickname      string    `json:"nickname"`
+	LikeCount     int       `json:"like_count"`
+	IsReply       bool      `json:"is_reply"`
+	ParentID      string    `json:"parent_id"`
+	ParentContent string    `json:"parent_content"`
+}
+
+```
+
+### docker-compose.yaml
+
+```
+version: "3.8"
+
+services:
+  curricurum_db:
+    container_name: hackathon01_db
+    build:
+      context: .
+      dockerfile: Dockerfile
+    platform: linux/x86_64
+    tty: true
+    ports:
+      - 3306:3306
+    env_file:
+      - ./.env
+    volumes:
+      - type: volume
+        source: hackathon01_mysql
+        target: /var/lib/mysql
+      - type: bind
+        source: ./init
+        target: /docker-entrypoint-initdb.d
+
+volumes:
+  hackathon01_mysql:
+    name: hackathon01_mysql
+
+```
+
+### go.mod
+
+```
+module api
+
+go 1.22.1
+
+require (
+	github.com/go-sql-driver/mysql v1.8.1
+	github.com/google/uuid v1.6.0
+	github.com/gorilla/mux v1.8.1
+	github.com/joho/godotenv v1.5.1
+	github.com/rs/cors v1.11.0
+	golang.org/x/crypto v0.24.0
+)
+
+require filippo.io/edwards25519 v1.1.0 // indirect
+
+```
+
+### Dockerfile
+
+```
+# syntax=docker/dockerfile:1
+
+FROM golang:1.22 as build
+
+# 作業ディレクトリを設定
+WORKDIR /app
+
+# /appにgo.modをコピーしgo modをダウンロード
+COPY . .
+
+RUN go mod download
+
+# go modのダウンロード、Goアプリのビルド
+RUN go build -v main.go
+
+# ポートを公開  
+EXPOSE 8080
+
+# コンテナ起動時に実行するコマンドを指定
+CMD ["go", "run", "main.go"]
+```
+
+### handlers.go
+
+```
+package main
+
+import (
+	"database/sql"
+	"encoding/json"
+	"log"
+	"net/http"
+	"time"
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
+	"api/db"
+)
+
+func signUpHandler(w http.ResponseWriter, r *http.Request) {
+	var user User
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		log.Printf("Error decoding signup request: %v", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	query := "INSERT INTO Users (id, email, password_hash, nickname) VALUES (?, ?, ?, ?)"
+	_, err = db.DB.Exec(query, user.ID, user.Email, string(hashedPassword), user.Nickname)
+	if err != nil {
+		log.Printf("Error inserting user into database: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("User created: %s, email: %s", user.ID, user.Email)
+	w.WriteHeader(http.StatusCreated)
+}
+
+func createPostHandler(w http.ResponseWriter, r *http.Request) {
+	var post Post
+	if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
+		log.Println("Error decoding post request:", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	log.Printf("Received post request: %+v", post)
+
+	var userID string
+	err := db.DB.QueryRow("SELECT id FROM Users WHERE id = ?", post.UserID).Scan(&userID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Println("Error validating user ID: no rows in result set for user ID:", post.UserID)
+			http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		} else {
+			log.Println("Error validating user ID:", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+
+	post.ID = uuid.New().String()
+	post.CreatedAt = time.Now()
+
+	query := "INSERT INTO Posts (id, user_id, content, created_at, is_reply, parent_id) VALUES (?, ?, ?, ?, ?, ?)"
+	_, err = db.DB.Exec(query, post.ID, post.UserID, post.Content, post.CreatedAt, post.IsReply, post.ParentID)
+	if err != nil {
+		log.Println("Error creating post:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Println("Post created successfully")
+	w.WriteHeader(http.StatusCreated)
+}
+
+func fetchPostsHandler(w http.ResponseWriter, r *http.Request) {
+	rows, err := db.DB.Query(`
+        SELECT p.id, p.user_id, p.content, p.created_at, IFNULL(u.nickname, '') as nickname, 
+        (SELECT COUNT(*) FROM Likes l WHERE l.post_id = p.id) as like_count, p.is_reply, IFNULL(p.parent_id, '') as parent_id,
+        IFNULL((SELECT content FROM Posts WHERE id = p.parent_id), '') as parent_content
+        FROM Posts p
+        JOIN Users u ON p.user_id = u.id
+        ORDER BY p.created_at DESC
+    `)
+	if err != nil {
+		log.Printf("Error fetching posts: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var posts []Post
+	for rows.Next() {
+		var (
+			post         Post
+			createdAtRaw []uint8
+		)
+		if err := rows.Scan(&post.ID, &post.UserID, &post.Content, &createdAtRaw, &post.Nickname, &post.LikeCount, &post.IsReply, &post.ParentID, &post.ParentContent); err != nil {
+			log.Printf("Error scanning post: %v", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		createdAt, err := time.Parse("2006-01-02 15:04:05", string(createdAtRaw))
+		if err != nil {
+			log.Printf("Error parsing created_at: %v", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		post.CreatedAt = createdAt
+
+		posts = append(posts, post)
+	}
+
+	if err := json.NewEncoder(w).Encode(posts); err != nil {
+		log.Printf("Error encoding posts to JSON: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func makeLikeHandler(w http.ResponseWriter, r *http.Request) {
+	var like struct {
+		ID     string `json:"id"`
+		UserID string `json:"user_id"`
+		PostID string `json:"post_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&like); err != nil {
+		log.Println("Error decoding like request:", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	log.Printf("Received like request: %+v", like)
+
+	like.ID = uuid.New().String()
+
+	query := "INSERT INTO Likes (id, user_id, post_id) VALUES (?, ?, ?)"
+	_, err := db.DB.Exec(query, like.ID, like.UserID, like.PostID)
+	if err != nil {
+		log.Println("Error inserting like into database:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Println("Like created successfully")
+	w.WriteHeader(http.StatusCreated)
+}
+
+```
+
+### go.sum
+
+```
+filippo.io/edwards25519 v1.1.0 h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
+filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
+github.com/go-sql-driver/mysql v1.8.1 h1:LedoTUt/eveggdHS9qUFC1EFSa8bU2+1pZjSRpvNJ1Y=
+github.com/go-sql-driver/mysql v1.8.1/go.mod h1:wEBSXgmK//2ZFJyE+qWnIsVGmvmEKlqwuVSjsCm7DZg=
+github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
+github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/gorilla/mux v1.8.1 h1:TuBL49tXwgrFYWhqrNgrUNEY92u81SPhu7sTdzQEiWY=
+github.com/gorilla/mux v1.8.1/go.mod h1:AKf9I4AEqPTmMytcMc0KkNouC66V3BtZ4qD5fmWSiMQ=
+github.com/joho/godotenv v1.5.1 h1:7eLL/+HRGLY0ldzfGMeQkb7vMd0as4CfYvUVzLqw0N0=
+github.com/joho/godotenv v1.5.1/go.mod h1:f4LDr5Voq0i2e/R5DDNOoa2zzDfwtkZa6DnEwAbqwq4=
+github.com/rs/cors v1.11.0 h1:0B9GE/r9Bc2UxRMMtymBkHTenPkHDv0CW4Y98GBY+po=
+github.com/rs/cors v1.11.0/go.mod h1:XyqrcTp5zjWr1wsJ8PIRZssZ8b/WMcMf71DJnit4EMU=
+golang.org/x/crypto v0.24.0 h1:mnl8DM0o513X8fdIkmyFE/5hTYxbwYOjDS/+rK6qpRI=
+golang.org/x/crypto v0.24.0/go.mod h1:Z1PMYSOR5nyMcyAVAIQSKCDwalqy85Aqn1x3Ws4L5DM=
+
+```
+
+### .env
+
+```
+MYSQL_DATABASE=mydatabase
+MYSQL_USER=user
+MYSQL_PASSWORD=hackathon
+MYSQL_HOST=tcp(127.0.0.1:3306)
+
+
+```
+
+### db/db.go
+
+```
+package db
+
+import (
+	"database/sql"
+	"fmt"
+	"log"
+	"os"
+
+	_ "github.com/go-sql-driver/mysql"
+	// "github.com/joho/godotenv"
+)
+
+var DB *sql.DB
+
+func Init() {
+	// err := godotenv.Load(".env")
+	// if err != nil {
+	// 	log.Fatalf("Error loading .env file: %v", err)
+	// }
+
+	dbUser := os.Getenv("MYSQL_USER")
+	dbPassword := os.Getenv("MYSQL_PASSWORD")
+	dbHost := os.Getenv("MYSQL_HOST")
+	dbName := os.Getenv("MYSQL_DATABASE")
+
+	log.Printf("MYSQL_USER: %s", dbUser)
+	log.Printf("MYSQL_PASSWORD: %s", dbPassword)
+	log.Printf("MYSQL_HOST: %s", dbHost)
+	log.Printf("MYSQL_DATABASE: %s", dbName)
+
+	dsn := fmt.Sprintf("%s:%s@%s/%s", dbUser, dbPassword, dbHost, dbName)
+
+	DB, err := sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatalf("Error opening database: %v", err)
+	}
+
+	if err = DB.Ping(); err != nil {
+		log.Fatalf("Error connecting to database: %v", err)
+	}
+}
+
+```
+
+### handlers/users.go
+
+```
+package handlers
+
+import (
+	"encoding/json"
+	"log"
+	"net/http"
+
+	"api/db" // dbパッケージをインポート
+
+	"golang.org/x/crypto/bcrypt"
+)
+
+type User struct {
+	ID       string `json:"id"`
+	Email    string `json:"email"`
+	Nickname string `json:"nickname"`
+	Password string `json:"password"`
+}
+
+func MakeUserHandler(w http.ResponseWriter, r *http.Request) {
+	var user User
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		log.Printf("Error decoding signup request: %v", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	query := "INSERT INTO Users (id, email, nickname, password_hash) VALUES (?, ?, ?, ?)"
+	_, err = db.DB.Exec(query, user.ID, user.Email, user.Nickname, string(hashedPassword))
+	if err != nil {
+		log.Printf("Error inserting user into database: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("User created: %s, email: %s", user.ID, user.Email)
+	w.WriteHeader(http.StatusCreated)
+}
+
+```
+
+### handlers/likes.go
+
+```
+package handlers
+
+import (
+	"database/sql"
+	"encoding/json"
+	"log"
+	"net/http"
+
+	"api/db" // dbパッケージをインポート
+
+	"github.com/google/uuid"
+)
+
+type Like struct {
+	ID     string `json:"id"`
+	UserID string `json:"user_id"`
+	PostID string `json:"post_id"`
+}
+
+func MakeLikeHandler(w http.ResponseWriter, r *http.Request) {
+	var like Like
+	if err := json.NewDecoder(r.Body).Decode(&like); err != nil {
+		log.Println("Error decoding like request:", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	log.Printf("Received like request: %+v", like)
+
+	// PostIDの検証
+	var postID string
+	err := db.DB.QueryRow("SELECT id FROM Posts WHERE id = ?", like.PostID).Scan(&postID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Println("Error validating post ID: no rows in result set")
+			http.Error(w, "Invalid post ID", http.StatusBadRequest)
+			return
+		}
+		log.Println("Error validating post ID:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	like.ID = uuid.New().String()
+
+	query := "INSERT INTO Likes (id, user_id, post_id) VALUES (?, ?, ?)"
+	_, err = db.DB.Exec(query, like.ID, like.UserID, like.PostID)
+	if err != nil {
+		log.Println("Error inserting like into database:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Println("Like created successfully")
+	w.WriteHeader(http.StatusCreated)
+}
+
+```
+
+### handlers/posts.go
+
+```
+// api/handlers/posts.go
+
+package handlers
+
+import (
+	"database/sql"
+	"encoding/json"
+	"log"
+	"net/http"
+	"time"
+	"api/db"
+
+	"github.com/google/uuid"
+)
+
+type Post struct {
+	ID            string `json:"id"`
+	UserID        string `json:"user_id"`
+	Content       string `json:"content"`
+	CreatedAt     string `json:"created_at"`
+	Nickname      string `json:"nickname"`
+	LikeCount     int    `json:"like_count"`
+	IsReply       bool   `json:"is_reply"`
+	ParentID      string `json:"parent_id"`
+	ParentContent string `json:"parent_content"`
+	ParentUser    string `json:"parent_user"`
+}
+
+func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
+	var post Post
+	if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
+		log.Println("Error decoding post request:", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	log.Printf("Received post request: %+v", post)
+
+	var userID string
+	err := db.DB.QueryRow("SELECT id FROM Users WHERE id = ?", post.UserID).Scan(&userID)
+	if err != nil {
+		log.Println("Error validating user ID:", err)
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	post.ID = uuid.New().String()
+	post.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
+
+	query := "INSERT INTO Posts (id, user_id, content, created_at, is_reply, parent_id) VALUES (?, ?, ?, ?, ?, ?)"
+	_, err = db.DB.Exec(query, post.ID, post.UserID, post.Content, post.CreatedAt, post.IsReply, post.ParentID)
+	if err != nil {
+		log.Println("Error creating post:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Println("Post created successfully")
+	w.WriteHeader(http.StatusCreated)
+}
+
+func FetchPostsHandler(w http.ResponseWriter, r *http.Request) {
+	rows, err := db.DB.Query(`
+        SELECT p.id, p.user_id, p.content, p.created_at, IFNULL(u.nickname, '') as nickname, 
+        (SELECT COUNT(*) FROM Likes l WHERE l.post_id = p.id) as like_count, p.is_reply, p.parent_id,
+        IFNULL(parent.content, '') as parent_content, IFNULL(parent_user.nickname, '') as parent_user
+        FROM Posts p
+        JOIN Users u ON p.user_id = u.id
+        LEFT JOIN Posts parent ON p.parent_id = parent.id
+        LEFT JOIN Users parent_user ON parent.user_id = parent_user.id
+        ORDER BY p.created_at DESC
+    `)
+	if err != nil {
+		log.Printf("Error fetching posts: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var posts []Post
+	for rows.Next() {
+		var post Post
+		var parentID sql.NullString
+		if err := rows.Scan(&post.ID, &post.UserID, &post.Content, &post.CreatedAt, &post.Nickname, &post.LikeCount, &post.IsReply, &parentID, &post.ParentContent, &post.ParentUser); err != nil {
+			log.Printf("Error scanning post: %v", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if parentID.Valid {
+			post.ParentID = parentID.String
+		} else {
+			post.ParentID = ""
+		}
+		posts = append(posts, post)
+	}
+
+	if err := json.NewEncoder(w).Encode(posts); err != nil {
+		log.Printf("Error encoding posts to JSON: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+```
+
+### main.go
+
+```
+package main
+
+import (
+	"api/db"
+	"api/handlers"
+	"log"
+	"net/http"
+
+	"github.com/gorilla/mux"
+	"github.com/rs/cors"
+)
+//こめんと
+
+func main() {
+	db.Init() // DB初期化
+
+	r := mux.NewRouter()
+
+	r.HandleFunc("/api/users", handlers.MakeUserHandler).Methods("POST")
+	r.HandleFunc("/api/posts", handlers.CreatePostHandler).Methods("POST")
+	r.HandleFunc("/api/posts", handlers.FetchPostsHandler).Methods("GET")
+	r.HandleFunc("/api/likes", handlers.MakeLikeHandler).Methods("POST")
+
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: []string{"GET", "POST"},
+		AllowedHeaders: []string{"Content-Type"},
+	})
+
+	handler := c.Handler(r)
+	log.Println("Server started on :8080")
+	log.Fatal(http.ListenAndServe(":8080", handler))
+}
+
+```
+
