@@ -1,60 +1,50 @@
 body {
-  background-color: #fafafa;
-  font-family: 'Georgia', serif;
-  color: #333;
+  background-color: #f5f8fa;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: #14171a;
   margin: 0;
   padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-image: url('https://www.example.com/path-to-your-paper-texture.jpg');
-  background-size: cover;
 }
 
 .app {
-  max-width: 700px;
-  margin: 20px;
-  padding: 30px;
-  background-color: #fff;
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 20px;
+  background-color: white;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #ddd;
-  overflow: hidden;
-  font-size: 16px;
 }
 
 .textarea {
   width: 100%;
-  height: 150px;
-  margin-bottom: 20px;
-  padding: 15px;
+  height: 100px;
+  margin-bottom: 10px;
+  padding: 10px;
   border-radius: 5px;
-  border: 1px solid #ccc;
-  font-size: 16px;
-  color: #333;
-  background-color: #f9f9f9;
-  resize: none;
+  border: 1px solid #ccd6dd;
+  font-size: 14px;
+  color: #14171a;
+  background-color: #f5f8fa;
 }
 
 .button {
   padding: 10px 20px;
-  background-color: #6c757d;
+  background-color: #1da1f2;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: bold;
-  margin-right: 10px;
+  margin-right: 10px; /* 追加 */
 }
 
 .button:last-child {
-  margin-right: 0;
+  margin-right: 0; /* 最後のボタンに余分なスペースを追加しない */
 }
 
 .button:hover {
-  background-color: #5a6268;
+  background-color: #0d8bec;
 }
 
 .posts {
@@ -62,23 +52,23 @@ body {
 }
 
 .post {
-  border: 1px solid #ddd;
-  padding: 20px;
+  border: 1px solid #e1e8ed;
+  padding: 15px;
   margin-bottom: 15px;
-  background-color: #fff;
+  background-color: white;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .post small {
-  color: #6c757d;
+  color: #657786;
 }
 
 .parent-post {
   margin-bottom: 10px;
   padding: 10px;
-  background-color: #f9f9f9;
-  border-left: 4px solid #6c757d;
+  background-color: #f5f8fa;
+  border-left: 4px solid #1da1f2;
   border-radius: 5px;
   font-style: italic;
 }
