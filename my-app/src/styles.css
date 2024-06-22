@@ -28,24 +28,45 @@ body {
 }
 
 .button {
-  padding: 10px 20px;
-  background-color: #1da1f2;
-  color: white;
-  border: none;
-  border-radius: 5px;
+  position: relative;
+  overflow: hidden;
+  transition: background 400ms;
+  color: #fff;
+  background-color: #6200ee;
+  padding: 1rem 2rem;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.5rem;
+  outline: 0;
+  border: 0;
+  border-radius: 0.25rem;
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
   cursor: pointer;
-  font-size: 14px;
-  font-weight: bold;
-  margin-right: 10px; /* 追加 */
+}
+
+.button:hover {
+  background-color: #5000d6;
+}
+
+.button span.ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: ripple 600ms linear;
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
 }
 
 .button:last-child {
   margin-right: 0; /* 最後のボタンに余分なスペースを追加しない */
 }
 
-.button:hover {
-  background-color: #0d8bec;
-}
+
 
 .posts {
   margin-top: 20px;
