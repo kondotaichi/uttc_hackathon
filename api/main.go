@@ -13,9 +13,6 @@ import (
 
 func main() {
 	db.Init() // DB初期化
-	if db.DB == nil {
-        log.Fatal("Database connection is nil")
-    }
 
 	r := mux.NewRouter()
 
