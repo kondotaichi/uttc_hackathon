@@ -1,41 +1,40 @@
 package db
 
 import (
-    "database/sql"
-    "fmt"
-    "log"
-    "os"
+	"database/sql"
+	"fmt"
+	"log"
+	"os"
 
-    _ "github.com/go-sql-driver/mysql"
-    "github.com/joho/godotenv"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var DB *sql.DB
 
 func Init() {
-    err := godotenv.Load(".env")
-    if err != nil {
-        log.Fatalf("Error loading .env file: %v", err)
-    }
+	// err := godotenv.Load(".env")
+	// if err != nil {
+	//     log.Fatalf("Error loading .env file: %v", err)
+	// }
 
-    dbUser := os.Getenv("MYSQL_USER")
-    dbPassword := os.Getenv("MYSQL_PASSWORD")
-    dbHost := os.Getenv("MYSQL_HOST")
-    dbName := os.Getenv("MYSQL_DATABASE")
+	dbUser := os.Getenv("MYSQL_USER")
+	dbPassword := os.Getenv("MYSQL_PASSWORD")
+	dbHost := os.Getenv("MYSQL_HOST")
+	dbName := os.Getenv("MYSQL_DATABASE")
 
-    log.Printf("MYSQL_USER: %s", dbUser)
-    log.Printf("MYSQL_PASSWORD: %s", dbPassword)
-    log.Printf("MYSQL_HOST: %s", dbHost)
-    log.Printf("MYSQL_DATABASE: %s", dbName)
+	log.Printf("MYSQL_USER: %s", dbUser)
+	log.Printf("MYSQL_PASSWORD: %s", dbPassword)
+	log.Printf("MYSQL_HOST: %s", dbHost)
+	log.Printf("MYSQL_DATABASE: %s", dbName)
 
-    dsn := fmt.Sprintf("%s:%s@%s/%s", dbUser, dbPassword, dbHost, dbName)
+	dsn := fmt.Sprintf("%s:%s@%s/%s", dbUser, dbPassword, dbHost, dbName)
 
-    DB, err = sql.Open("mysql", dsn)
-    if err != nil {
-        log.Fatalf("Error opening database: %v", err)
-    }
+	DB, err = sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatalf("Error opening database: %v", err)
+	}
 
-    if err = DB.Ping(); err != nil {
-        log.Fatalf("Error connecting to database: %v", err)
-    }
+	if err = DB.Ping(); err != nil {
+		log.Fatalf("Error connecting to database: %v", err)
+	}
 }
