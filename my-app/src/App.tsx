@@ -177,7 +177,7 @@ const App: React.FC = () => {
 
   return (
     <div className="app">
-      <h1>Twitter-like App</h1>
+      <h1>ついったー</h1>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       {!loggedIn ? (
         <div>
