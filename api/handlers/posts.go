@@ -1,12 +1,14 @@
+// api/handlers/posts.go
+
 package handlers
 
 import (
+	"api/db"
 	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
 	"time"
-	"api/db"
 
 	"github.com/google/uuid"
 )
@@ -58,10 +60,9 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func FetchPostsHandler(w http.ResponseWriter, r *http.Request) {
-	// 基本的なポスト情報を取得
 	rows, err := db.DB.Query(`
         SELECT p.id, p.user_id, p.content, p.created_at, IFNULL(u.nickname, '') as nickname, 
-        p.is_reply, p.parent_id,
+        (SELECT COUNT(DISTINCT id) FROM Likes l WHERE l.post_id = p.id) as like_count, p.is_reply, p.parent_id,
         IFNULL(parent.content, '') as parent_content, IFNULL(parent_user.nickname, '') as parent_user
         FROM Posts p
         JOIN Users u ON p.user_id = u.id
@@ -77,13 +78,12 @@ func FetchPostsHandler(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	var posts []Post
-	postMap := make(map[string]*Post)
 	for rows.Next() {
 		var post Post
 		var parentID sql.NullString
 		if err := rows.Scan(
 			&post.ID, &post.UserID, &post.Content, &post.CreatedAt, &post.Nickname,
-			&post.IsReply, &parentID, &post.ParentContent, &post.ParentUser); err != nil {
+			&post.LikeCount, &post.IsReply, &parentID, &post.ParentContent, &post.ParentUser); err != nil {
 			log.Printf("Error scanning post: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -94,23 +94,12 @@ func FetchPostsHandler(w http.ResponseWriter, r *http.Request) {
 			post.ParentID = ""
 		}
 		posts = append(posts, post)
-		postMap[post.ID] = &post
 	}
 
 	if err := rows.Err(); err != nil {
 		log.Printf("Rows iteration error: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	}
-
-	// 各ポストのライク数を取得
-	for _, post := range posts {
-		err := db.DB.QueryRow("SELECT COUNT(DISTINCT id) FROM Likes WHERE post_id = ?", post.ID).Scan(&post.LikeCount)
-		if err != nil {
-			log.Printf("Error fetching like count for post %s: %v", post.ID, err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
 	}
 
 	if err := json.NewEncoder(w).Encode(posts); err != nil {
