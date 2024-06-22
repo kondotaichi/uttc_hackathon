@@ -51,7 +51,7 @@ const App: React.FC = () => {
 
   const makeUser = async (uid: string, email: string, nickname: string) => {
     try {
-      await axios.post('http://localhost:8080/api/users', {
+      await axios.post('https://uttc-hackathon3-lx5cqmshrq-uc.a.run.app/api/users', {
         id: uid,
         email: email,
         nickname: nickname,
@@ -98,7 +98,7 @@ const App: React.FC = () => {
         return;
       }
 
-      await axios.post('http://localhost:8080/api/posts', {
+      await axios.post('https://uttc-hackathon3-lx5cqmshrq-uc.a.run.app/api/posts', {
         user_id: userID,
         content: userPost,
         is_reply: !!replyTo,
@@ -123,7 +123,7 @@ const App: React.FC = () => {
         return;
       }
 
-      await axios.post('http://localhost:8080/api/likes', {
+      await axios.post('https://uttc-hackathon3-lx5cqmshrq-uc.a.run.app/api/likes', {
         user_id: userID,
         post_id: postID,
       });
@@ -137,7 +137,7 @@ const App: React.FC = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/posts');
+      const response = await axios.get('https://uttc-hackathon3-lx5cqmshrq-uc.a.run.app/api/posts');
       setPosts(response.data);
     } catch (error) {
       console.error('Error fetching posts:', error);
