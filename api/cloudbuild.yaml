@@ -1,7 +1,0 @@
-steps:
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/term5-taichi-kondo/my-go-app', '.']
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/term5-taichi-kondo/my-go-app']
-images:
-  - 'gcr.io/term5-taichi-kondo/my-go-app'
