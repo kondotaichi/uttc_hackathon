@@ -7,7 +7,6 @@ WORKDIR /app
 COPY . .
 
 # Build the Go app
-RUN go mod init hello
 RUN go mod tidy
 RUN go build -o main .
 
