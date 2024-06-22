@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { fireAuth } from './firebase/firebase.js';
-import './styles.css';  // スタイルシートをインポート
+import './styles.css';
 import { onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 
 interface Post {
@@ -26,6 +26,7 @@ const App: React.FC = () => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userID, setUserID] = useState<string | null>(null);
+  const [showSmiley, setShowSmiley] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
     onAuthStateChanged(fireAuth, async (user) => {
@@ -97,7 +98,6 @@ const App: React.FC = () => {
         setError('Post content is empty. Please enter some content.');
         return;
       }
-      console.log("Hello!");
 
       await axios.post('https://uttc-hackathon3-lx5cqmshrq-uc.a.run.app/api/posts', {
         user_id: userID,
@@ -130,6 +130,10 @@ const App: React.FC = () => {
       });
       console.log("Like created");
       fetchPosts();
+      setShowSmiley((prev) => ({ ...prev, [postID]: true }));
+      setTimeout(() => {
+        setShowSmiley((prev) => ({ ...prev, [postID]: false }));
+      }, 1000);
     } catch (error) {
       console.error('Error liking post:', error);
       setError('Error liking post. Please try again.');
@@ -215,6 +219,7 @@ const App: React.FC = () => {
                   Posted by {post.nickname} at {new Date(post.created_at).toLocaleString()}
                 </small>
                 <p>Likes: {post.like_count}</p>
+                {showSmiley[post.id] && <div className="smiley">😊</div>}
                 {replyTo === post.id && (
                   <div className="reply-section">
                     <textarea
