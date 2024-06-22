@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { fireAuth } from './firebase/firebase.js';
+import ReactMarkdown from 'react-markdown';
 import './styles.css';
 import { onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 
@@ -149,6 +150,7 @@ const App: React.FC = () => {
       setError('Error fetching posts. Please try again.');
     }
   };
+
   const createRipple = (event: React.MouseEvent<HTMLButtonElement>) => {
     const button = event.currentTarget;
     const circle = document.createElement('span');
@@ -225,7 +227,7 @@ const App: React.FC = () => {
                     <p>Replying to: {post.parent_content}</p>
                   </div>
                 )}
-                <p>{post.content}</p>
+                <ReactMarkdown>{post.content}</ReactMarkdown>
                 <div className="button-group">
                   <button className="button" onClick={(e) => {createRipple(e); setReplyTo(post.id); }}>
                     リプライ
@@ -257,6 +259,4 @@ const App: React.FC = () => {
       )}
     </div>
   );
-};
-
-export default App;
+}
