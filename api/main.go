@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 )
+//こめんと
 
 func main() {
 	db.Init() // DB初期化
