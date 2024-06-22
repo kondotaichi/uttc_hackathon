@@ -10,6 +10,7 @@ import (
 	"github.com/rs/cors"
 )
 //こめんと
+//こめんと
 
 func main() {
 	db.Init() // DB初期化
