@@ -205,7 +205,7 @@ const App: React.FC = () => {
                 <p>{post.content}</p>
                 <div className="button-group">
                   <button className="button" onClick={() => setReplyTo(post.id)}>
-                    Reply
+                    リプライ
                   </button>
                   <button className="button" onClick={() => makeLike(post.id)}>
                     ええやん！
@@ -220,7 +220,7 @@ const App: React.FC = () => {
                     <textarea
                       value={userPost}
                       onChange={(e) => setUserPost(e.target.value)}
-                      placeholder="Write a reply..."
+                      placeholder="返信書けやこら"
                       className="textarea"
                     />
                     <button onClick={makePost} className="button">Reply</button>
