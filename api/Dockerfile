@@ -1,47 +1,27 @@
-# Stage 1: Build the Go app
-FROM golang:1.16 as builder
+FROM golang:1.21 as build
 
-# Set the working directory
+# Set the Current Working Directory inside the container
 WORKDIR /app
 
-# Copy go.mod and go.sum and download dependencies
-COPY go.mod go.sum ./
-RUN go mod tidy
-
-# Copy the source code and build the application
+# Copy the source code into the container
 COPY . .
+
+# Build the Go app
+RUN go mod init hello
+RUN go mod tidy
 RUN go build -o main .
 
-# Stage 2: Create the final image
-FROM alpine:latest
+# Stage 2: A minimal Docker image to run the Go app
+FROM debian:bullseye-slim
 
-# Set environment variables for MySQL
-ENV MYSQL_HOST=unix(/cloudsql/term5-taichi-kondo:us-central1:uttc)
-ENV MYSQL_PORT=3306
-ENV MYSQL_USER=root
-ENV MYSQL_PASSWORD=password
-ENV MYSQL_DATABASE=hackathon
+# Set the Current Working Directory inside the container
+WORKDIR /app
 
-# Install necessary packages
-RUN apk --no-cache add ca-certificates openssh
+# Copy the Pre-built binary file from the previous stage
+COPY --from=build /app/main .
 
-# Set the working directory
-WORKDIR /root/
+# Expose port 8000 to the outside world
+EXPOSE 8000
 
-# Copy the Go binary from the builder stage
-COPY --from=builder /app/main .
-
-# Expose the application port
-EXPOSE 8080
-
-# Expose the SSH port
-EXPOSE 22
-
-# Set root password for SSH (please change 'yourpassword' to a secure password)
-RUN echo 'root:yourpassword' | chpasswd
-
-# Allow root login via SSH
-RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-
-# Start SSH service and run the Go application
-CMD ["/bin/sh", "-c", "sshd && ./main"]
+# Command to run the executable
+CMD ["./main"]
