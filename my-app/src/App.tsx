@@ -97,6 +97,7 @@ const App: React.FC = () => {
         setError('Post content is empty. Please enter some content.');
         return;
       }
+      console.log("Hello!");
 
       await axios.post('https://uttc-hackathon3-lx5cqmshrq-uc.a.run.app/api/posts', {
         user_id: userID,
