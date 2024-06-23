@@ -22,7 +22,6 @@ const App: React.FC = () => {
   const [password, setPassword] = useState('');
   const [nickname, setNickname] = useState('');
   const [userPost, setUserPost] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loggedIn, setLoggedIn] = useState(false);
@@ -96,31 +95,29 @@ const App: React.FC = () => {
         setError('No user is logged in. Please log in first.');
         return;
       }
-      
-      if (!userPost.trim() && !imageUrl.trim()) {
-        console.error('Post content and image URL are empty');
-        setError('Post content and image URL are empty. Please enter some content or provide an image URL.');
+      if (!userPost.trim()) {
+        console.error('Post content is empty');
+        setError('Post content is empty. Please enter some content.');
         return;
       }
 
-      const content = `${userPost.trim()} ${imageUrl.trim()}`;
-
       const response = await axios.post('https://uttc-hackathon3-lx5cqmshrq-uc.a.run.app/api/posts', {
         user_id: userID,
-        content: content,
+        content: userPost,
         is_reply: !!replyTo,
         parent_id: replyTo,
       });
       console.log("Post created");
 
       setUserPost('');
-      setImageUrl('');
       setReplyTo(null);
       fetchPosts();
 
+      // Add the new post ID to rotating posts
       const newPostId = response.data.id;
       setRotatingPosts(prev => [...prev, newPostId]);
 
+      // Remove the post ID from rotating posts after 5 seconds
       setTimeout(() => {
         setRotatingPosts(prev => prev.filter(id => id !== newPostId));
       }, 5000);
@@ -130,41 +127,6 @@ const App: React.FC = () => {
       setError('Error creating post. Please try again.');
     }
   };
-
-  const fetchPosts = async () => {
-    try {
-      const response = await axios.get('https://uttc-hackathon3-lx5cqmshrq-uc.a.run.app/api/posts');
-      const postsWithJST = response.data.map((post: Post) => ({
-        ...post,
-        created_at: formatToJST(post.created_at)
-      }));
-      setPosts(postsWithJST);
-    } catch (error) {
-      console.error('Error fetching posts:', error);
-      setError('Error fetching posts. Please try again.');
-    }
-  };
-
-  const createRipple = (event: React.MouseEvent<HTMLButtonElement>) => {
-    const button = event.currentTarget;
-    const circle = document.createElement('span');
-    const diameter = Math.max(button.clientWidth, button.clientHeight);
-    const radius = diameter / 2;
-  
-    circle.style.width = circle.style.height = `${diameter}px`;
-    circle.style.left = `${event.clientX - button.offsetLeft - radius}px`;
-    circle.style.top = `${event.clientY - button.offsetTop - radius}px`;
-    circle.classList.add('ripple');
-  
-    const ripple = button.getElementsByClassName('ripple')[0];
-  
-    if (ripple) {
-      ripple.remove();
-    }
-  
-    button.appendChild(circle);
-  };
-  
 
   const makeLike = async (postID: string) => {
     try {
@@ -190,18 +152,23 @@ const App: React.FC = () => {
     }
   };
 
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get('https://uttc-hackathon3-lx5cqmshrq-uc.a.run.app/api/posts');
+      setPosts(response.data);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      setError('Error fetching posts. Please try again.');
+    }
+  };
+
   useEffect(() => {
     fetchPosts();
   }, []);
 
-  const formatToJST = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
-  };
-
   return (
     <div className="app">
-      <h1 className="app-title">ツイッター！日本標準時！ボタンも！</h1>
+      <h1 className="app-title">ツイッター風</h1>
       {error && <p className="error-message">{error}</p>}
       {!loggedIn ? (
         <div className="auth-container">
@@ -210,36 +177,37 @@ const App: React.FC = () => {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="auth-input"
+            className="input-field"
           />
           <input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="auth-input"
+            className="input-field"
           />
-          <button onClick={(e) => { createRipple(e); handleLogin(); }} className="auth-button">ログインするで〜</button>
+          <input
+            type="text"
+            placeholder="Nickname"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            className="input-field"
+          />
+          <button onClick={handleSignUp} className="auth-button">Sign Up</button>
+          <button onClick={handleLogin} className="auth-button">Login</button>
         </div>
       ) : (
         <div className="content-container">
           {replyTo === null && (
             <div className="post-form">
-              <button onClick={(e) => { createRipple(e); handleLogout(); }} className="logout-button">Logout</button>
+              <button onClick={handleLogout} className="logout-button">Logout</button>
               <textarea
                 value={userPost}
                 onChange={(e) => setUserPost(e.target.value)}
                 placeholder="What's happening? (Markdown supported)"
                 className="post-textarea"
               />
-              <input
-                type="text"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="Image URL (optional)"
-                className="image-url-input"
-              />
-              <button onClick={(e) => { createRipple(e); makePost(); }} className="post-button">Post</button>
+              <button onClick={makePost} className="post-button">Post</button>
             </div>
           )}
           <div className="posts-container">
@@ -254,18 +222,17 @@ const App: React.FC = () => {
                   </div>
                 )}
                 <ReactMarkdown className="post-content">{post.content}</ReactMarkdown>
-                {post.content.match(/https?:\/\/[^\s]+/g) && (
-                  <img src={post.content.match(/https?:\/\/[^\s]+/g)![0]} alt="Post image" className="post-image" />
-                )}
                 <div className="post-actions">
-                <button onClick={(e) => { createRipple(e); setReplyTo(post.id); }} className="action-button">Reply</button>
-                <button onClick={(e) => { createRipple(e); makeLike(post.id); }} className="action-button">
+                  <button className="action-button" onClick={() => setReplyTo(post.id)}>
+                    Reply
+                  </button>
+                  <button className="action-button" onClick={() => makeLike(post.id)}>
                     Like
                   </button>
                 </div>
                 <div className="post-meta">
                   <small>
-                    Posted by {post.nickname} at {formatToJST(post.created_at)}
+                    Posted by {post.nickname} at {new Date(post.created_at).toLocaleString()}
                   </small>
                   <p>Likes: {post.like_count}</p>
                 </div>
@@ -277,13 +244,6 @@ const App: React.FC = () => {
                       onChange={(e) => setUserPost(e.target.value)}
                       placeholder="Write your reply (Markdown supported)"
                       className="reply-textarea"
-                    />
-                    <input
-                      type="text"
-                      value={imageUrl}
-                      onChange={(e) => setImageUrl(e.target.value)}
-                      placeholder="Image URL (optional)"
-                      className="image-url-input"
                     />
                     <button onClick={makePost} className="reply-button">Reply</button>
                   </div>
