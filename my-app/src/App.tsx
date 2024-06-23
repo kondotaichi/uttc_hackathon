@@ -18,10 +18,75 @@ interface Post {
 }
 
 const App: React.FC = () => {
-  // ... (previous state declarations remain the same)
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [userPost, setUserPost] = useState('');
+  const [replyTo, setReplyTo] = useState<string | null>(null);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [userID, setUserID] = useState<string | null>(null);
   const [rotatingPosts, setRotatingPosts] = useState<string[]>([]);
+  const [showSmiley, setShowSmiley] = useState<{ [key: string]: boolean }>({});
 
-  // ... (previous useEffect and other functions remain the same)
+  useEffect(() => {
+    onAuthStateChanged(fireAuth, async (user) => {
+      setLoggedIn(!!user);
+      if (user) {
+        setUserID(user.uid);
+        fetchPosts();
+      }
+    });
+  }, []);
+
+  const handleSignUp = async () => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(fireAuth, email, password);
+      const user = userCredential.user;
+      await makeUser(user.uid, email, nickname);
+      setUserID(user.uid);
+    } catch (error) {
+      console.error('Error signing up:', error);
+      setError('Error signing up. Please try again.');
+    }
+  };
+
+  const makeUser = async (uid: string, email: string, nickname: string) => {
+    try {
+      await axios.post('https://uttc-hackathon3-lx5cqmshrq-uc.a.run.app/api/users', {
+        id: uid,
+        email: email,
+        nickname: nickname,
+        password: password,
+      });
+      console.log("User created");
+    } catch (error) {
+      console.error('Error creating user:', error);
+      setError('Error creating user. Please try again.');
+    }
+  };
+
+  const handleLogin = async () => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(fireAuth, email, password);
+      setUserID(userCredential.user.uid);
+    } catch (error) {
+      console.error('Error logging in:', error);
+      setError('Error logging in. Please try again.');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(fireAuth);
+      setUserID(null);
+      setLoggedIn(false);
+    } catch (error) {
+      console.error('Error logging out:', error);
+      setError('Error logging out. Please try again.');
+    }
+  };
 
   const makePost = async () => {
     try {
@@ -63,22 +128,128 @@ const App: React.FC = () => {
     }
   };
 
-  // ... (fetchPosts and other functions remain the same)
+  const makeLike = async (postID: string) => {
+    try {
+      if (!userID) {
+        console.error('No user is logged in');
+        setError('No user is logged in. Please log in first.');
+        return;
+      }
+
+      await axios.post('https://uttc-hackathon3-lx5cqmshrq-uc.a.run.app/api/likes', {
+        user_id: userID,
+        post_id: postID,
+      });
+      console.log("Like created");
+      fetchPosts();
+      setShowSmiley((prev) => ({ ...prev, [postID]: true }));
+      setTimeout(() => {
+        setShowSmiley((prev) => ({ ...prev, [postID]: false }));
+      }, 1000);
+    } catch (error) {
+      console.error('Error liking post:', error);
+      setError('Error liking post. Please try again.');
+    }
+  };
+
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get('https://uttc-hackathon3-lx5cqmshrq-uc.a.run.app/api/posts');
+      setPosts(response.data);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      setError('Error fetching posts. Please try again.');
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
   return (
     <div className="app">
-      {/* ... (previous JSX remains the same) */}
-      <div className="posts-container">
-        {posts.map((post) => (
-          <div 
-            key={post.id} 
-            className={`post-card ${rotatingPosts.includes(post.id) ? 'rotating' : ''}`}
-          >
-            {/* ... (post content remains the same) */}
+      <h1 className="app-title">ツイッター風</h1>
+      {error && <p className="error-message">{error}</p>}
+      {!loggedIn ? (
+        <div className="auth-container">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="input-field"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="input-field"
+          />
+          <input
+            type="text"
+            placeholder="Nickname"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            className="input-field"
+          />
+          <button onClick={handleSignUp} className="auth-button">Sign Up</button>
+          <button onClick={handleLogin} className="auth-button">Login</button>
+        </div>
+      ) : (
+        <div className="content-container">
+          {replyTo === null && (
+            <div className="post-form">
+              <button onClick={handleLogout} className="logout-button">Logout</button>
+              <textarea
+                value={userPost}
+                onChange={(e) => setUserPost(e.target.value)}
+                placeholder="What's happening? (Markdown supported)"
+                className="post-textarea"
+              />
+              <button onClick={makePost} className="post-button">Post</button>
+            </div>
+          )}
+          <div className="posts-container">
+            {posts.map((post) => (
+              <div key={post.id} className="post-card">
+                {post.is_reply && post.parent_content && (
+                  <div className="parent-post">
+                    <p>Replying to: <ReactMarkdown>{post.parent_content}</ReactMarkdown></p>
+                  </div>
+                )}
+                <ReactMarkdown className="post-content">{post.content}</ReactMarkdown>
+                <div className="post-actions">
+                  <button className="action-button" onClick={() => setReplyTo(post.id)}>
+                    Reply
+                  </button>
+                  <button className="action-button" onClick={() => makeLike(post.id)}>
+                    Like
+                  </button>
+                </div>
+                <div className="post-meta">
+                  <small>
+                    Posted by {post.nickname} at {new Date(post.created_at).toLocaleString()}
+                  </small>
+                  <p>Likes: {post.like_count}</p>
+                </div>
+                {showSmiley[post.id] && <div className="smiley">😊</div>}
+                {replyTo === post.id && (
+                  <div className="reply-form">
+                    <textarea
+                      value={userPost}
+                      onChange={(e) => setUserPost(e.target.value)}
+                      placeholder="Write your reply (Markdown supported)"
+                      className="reply-textarea"
+                    />
+                    <button onClick={makePost} className="reply-button">Reply</button>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      {/* ... (rest of the JSX remains the same) */}
+        </div>
+      )}
     </div>
   );
 };
