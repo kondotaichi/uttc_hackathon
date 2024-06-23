@@ -1,118 +1,149 @@
-body {
-  background-color: #0d0d0d; /* 背景色を濃い黒に */
-  font-family: 'Roboto', sans-serif;
-  color: #c1c1c1; /* 文字色を明るい灰色に */
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
 .app {
-  max-width: 600px;
-  margin: 20px;
-  padding: 30px;
-  background-color: #1a1a1a; /* アプリ背景色をダークグレーに */
-  border-radius: 15px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  border: 1px solid #333333; /* ボーダー色を濃いグレーに */
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
 }
 
-.textarea {
-  width: 100%;
-  height: 100px;
-  margin-bottom: 15px;
-  padding: 15px;
-  border-radius: 10px;
-  border: 1px solid #4b4b4b; /* ボーダー色を濃いグレーに */
-  font-size: 14px;
-  color: #c1c1c1; /* 文字色を明るい灰色に */
-  background-color: #262626; /* 背景色をダークグレーに */
-  resize: none;
+.app-title {
+  text-align: center;
+  color: #333;
 }
 
-.button {
-  padding: 10px 20px;
-  font-size: 14px;
-  color: #ffffff; /* ボタン文字色を白に */
-  background-color: #00c6ff; /* ボタン背景色を未来感のある青に */
+.error-message {
+  color: red;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.auth-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.input-field {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.auth-button {
+  padding: 10px;
+  background-color: #4CAF50;
+  color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: background-color 0.3s, transform 0.3s;
 }
 
-.button:hover {
-  background-color: #0073e6; /* ホバー時の背景色を濃い青に */
-  transform: scale(1.05);
+.auth-button:hover {
+  background-color: #45a049;
 }
 
-.ripple {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.6);
-  transform: scale(0);
-  animation: ripple-animation 0.6s linear;
-}
-
-@keyframes ripple-animation {
-  to {
-    transform: scale(4);
-    opacity: 0;
-  }
-}
-
-.posts {
+.content-container {
   margin-top: 20px;
 }
 
-.post {
-  border: 1px solid #444444;
-  padding: 20px;
+.post-form {
   margin-bottom: 20px;
-  background-color: #1a1a1a; /* 投稿背景色をダークグレーに */
-  border-radius: 15px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
-.post small {
-  color: #7a7a7a; /* 投稿の小さい文字の色を中間の灰色に */
+.logout-button {
+  padding: 5px 10px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.logout-button:hover {
+  background-color: #d32f2f;
+}
+
+.post-textarea, .reply-textarea {
+  width: 100%;
+  height: 100px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+  margin-bottom: 10px;
+}
+
+.post-button, .reply-button {
+  padding: 10px 20px;
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.post-button:hover, .reply-button:hover {
+  background-color: #1976D2;
+}
+
+.posts-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.post-card {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 15px;
+  background-color: #f9f9f9;
 }
 
 .parent-post {
-  margin-bottom: 10px;
+  background-color: #e9e9e9;
   padding: 10px;
-  background-color: #2d2d2d; /* 親投稿の背景色を中間のグレーに */
-  border-left: 4px solid #00c6ff; /* 親投稿のボーダー色を未来感のある青に */
-  border-radius: 10px;
-  font-style: italic;
+  border-radius: 4px;
+  margin-bottom: 10px;
 }
 
-.reply-section {
-  margin-top: 10px;
+.post-content {
+  margin-bottom: 10px;
 }
 
-@keyframes smileyJump {
-  0% {
-    transform: scale(0);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.5);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0;
-  }
+.post-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.action-button {
+  padding: 5px 10px;
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.action-button:hover {
+  background-color: #1976D2;
+}
+
+.post-meta {
+  font-size: 0.8em;
+  color: #666;
 }
 
 .smiley {
-  position: absolute;
-  font-size: 24px;
-  animation: smileyJump 1s ease-in-out forwards;
+  font-size: 2em;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.reply-form {
+  margin-top: 10px;
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
 }

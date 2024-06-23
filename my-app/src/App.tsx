@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { fireAuth } from './firebase/firebase.js';
+import ReactMarkdown from 'react-markdown';
 import './styles.css';
 import { onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 
@@ -156,79 +157,81 @@ const App: React.FC = () => {
 
   return (
     <div className="app">
-      <h1>ツイッター風</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <h1 className="app-title">Markdown SNS</h1>
+      {error && <p className="error-message">{error}</p>}
       {!loggedIn ? (
-        <div>
+        <div className="auth-container">
           <input
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="textarea"
+            className="input-field"
           />
           <input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="textarea"
+            className="input-field"
           />
           <input
             type="text"
             placeholder="Nickname"
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
-            className="textarea"
+            className="input-field"
           />
-          <button onClick={handleSignUp} className="button">Sign Up</button>
-          <button onClick={handleLogin} className="button">Login</button>
+          <button onClick={handleSignUp} className="auth-button">Sign Up</button>
+          <button onClick={handleLogin} className="auth-button">Login</button>
         </div>
       ) : (
-        <div>
+        <div className="content-container">
           {replyTo === null && (
-            <>
-              <button onClick={handleLogout} className="button">Logout</button>
+            <div className="post-form">
+              <button onClick={handleLogout} className="logout-button">Logout</button>
               <textarea
                 value={userPost}
                 onChange={(e) => setUserPost(e.target.value)}
-                placeholder="What's happening?"
-                className="textarea"
+                placeholder="What's happening? (Markdown supported)"
+                className="post-textarea"
               />
-              <button onClick={makePost} className="button">Post</button>
-            </>
+              <button onClick={makePost} className="post-button">Post</button>
+            </div>
           )}
-          <div className="posts">
+          <div className="posts-container">
             {posts.map((post) => (
-              <div key={post.id} className="post">
+              <div key={post.id} className="post-card">
                 {post.is_reply && post.parent_content && (
                   <div className="parent-post">
-                    <p>Replying to: {post.parent_content}</p>
+                    <p>Replying to: <ReactMarkdown>{post.parent_content}</ReactMarkdown></p>
                   </div>
                 )}
-                <p>{post.content}</p>
-                <div className="button-group">
-                  <button className="button" onClick={() => setReplyTo(post.id)}>
-                    リプライ
+                <ReactMarkdown className="post-content">{post.content}</ReactMarkdown>
+                <div className="post-actions">
+                  <button className="action-button" onClick={() => setReplyTo(post.id)}>
+                    Reply
                   </button>
-                  <button className="button" onClick={() => makeLike(post.id)}>
-                    ええやん！
+                  <button className="action-button" onClick={() => makeLike(post.id)}>
+                    Like
                   </button>
                 </div>
-                <small>
-                  Posted by {post.nickname} at {new Date(post.created_at).toLocaleString()}
-                </small>
-                <p>Likes: {post.like_count}</p>
+                <div className="post-meta">
+                  <small>
+                    Posted by {post.nickname} at {new Date(post.created_at).toLocaleString()}
+                  </small>
+                  <p>Likes: {post.like_count}</p>
+                </div>
                 {showSmiley[post.id] && <div className="smiley">😊</div>}
                 {replyTo === post.id && (
-                  <div className="reply-section">
+                  <div className="reply-form">
                     <textarea
                       value={userPost}
                       onChange={(e) => setUserPost(e.target.value)}
-                      placeholder="返信書けやこら"
-                      className="textarea"
+                      placeholder="Write your reply (Markdown supported)"
+                      className="reply-textarea"
                     />
-                    <button onClick={makePost} className="button">Reply</button>
+                    <button onClick={makePost} className="reply-button">Reply</button>
                   </div>
                 )}
               </div>
