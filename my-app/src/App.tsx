@@ -169,6 +169,11 @@ const App: React.FC = () => {
     fetchPosts();
   }, []);
 
+  const formatToJST = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
+  };
+
   return (
     <div className="app">
       <h1 className="app-title">ツイッターがぞうとうこう</h1>
@@ -237,7 +242,7 @@ const App: React.FC = () => {
                 </div>
                 <div className="post-meta">
                   <small>
-                    Posted by {post.nickname} at {new Date(post.created_at).toLocaleString()}
+                    Posted by {post.nickname} at {formatToJST(post.created_at)}
                   </small>
                   <p>Likes: {post.like_count}</p>
                 </div>
