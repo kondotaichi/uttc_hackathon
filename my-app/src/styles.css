@@ -1,178 +1,131 @@
-.app {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: Arial, sans-serif;
-}
-
-.app-title {
-  text-align: center;
-  color: #333;
-}
-
-.error-message {
-  color: red;
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-.auth-container {
+body {
+  background-color: #1e1e1e;
+  font-family: 'Roboto', sans-serif;
+  color: #e0e0e0;
+  margin: 0;
+  padding: 0;
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-width: 300px;
-  margin: 0 auto;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-.input-field {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.app {
+  max-width: 600px;
+  margin: 20px;
+  padding: 30px;
+  background-color: #2e2e2e;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  border: 1px solid #3a3a3a;
 }
 
-.auth-button {
-  padding: 10px;
-  background-color: #4CAF50;
-  color: white;
+.textarea {
+  width: 100%;
+  height: 100px;
+  margin-bottom: 15px;
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #5a5a5a;
+  font-size: 14px;
+  color: #e0e0e0;
+  background-color: #333333;
+  resize: none;
+}
+
+.button {
+  padding: 10px 20px;
+  font-size: 14px;
+  color: #e0e0e0;
+  background-color: #6200ea;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: background-color 0.3s, transform 0.3s;
 }
 
-.auth-button:hover {
-  background-color: #45a049;
+.button:hover {
+  background-color: #3700b3;
+  transform: scale(1.05);
 }
 
-.content-container {
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  transform: scale(0);
+  animation: ripple-animation 0.6s linear;
+}
+
+@keyframes ripple-animation {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.posts {
   margin-top: 20px;
 }
 
-.post-form {
+.post {
+  border: 1px solid #444444;
+  padding: 20px;
   margin-bottom: 20px;
+  background-color: #2e2e2e;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
-.logout-button {
-  padding: 5px 10px;
-  background-color: #f44336;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-bottom: 10px;
-}
-
-.logout-button:hover {
-  background-color: #d32f2f;
-}
-
-.post-textarea, .reply-textarea {
-  width: 100%;
-  height: 100px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  resize: vertical;
-  margin-bottom: 10px;
-}
-
-.post-button, .reply-button {
-  padding: 10px 20px;
-  background-color: #2196F3;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.post-button:hover, .reply-button:hover {
-  background-color: #1976D2;
-}
-
-.posts-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.post-card {
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 15px;
-  background-color: #f9f9f9;
+.post.small {
+  color: #9e9e9e;
 }
 
 .parent-post {
-  background-color: #e9e9e9;
+  margin-bottom: 10px;
   padding: 10px;
-  border-radius: 4px;
-  margin-bottom: 10px;
+  background-color: #3a3a3a;
+  border-left: 4px solid #6200ea;
+  border-radius: 10px;
+  font-style: italic;
 }
 
-.post-content {
-  margin-bottom: 10px;
+.reply-section {
+  margin-top: 10px;
 }
 
-.post-actions {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.action-button {
-  padding: 5px 10px;
-  background-color: #2196F3;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.action-button:hover {
-  background-color: #1976D2;
-}
-
-.post-meta {
-  font-size: 0.8em;
-  color: #666;
+@keyframes smileyJump {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
 }
 
 .smiley {
-  font-size: 2em;
-  text-align: center;
-  margin-top: 10px;
-}
-
-.reply-form {
-  margin-top: 10px;
-  border-top: 1px solid #ddd;
-  padding-top: 10px;
+  position: absolute;
+  font-size: 24px;
+  animation: smileyJump 1s ease-in-out forwards;
 }
 
 @keyframes rotate {
-  0% {
+  from {
     transform: rotate(0deg);
   }
-  25% {
-    transform: rotate(90deg);
-  }
-  50% {
-    transform: rotate(0deg);
-  }
-  75% {
-    transform: rotate(-90deg);
-  }
-  100% {
-    transform: rotate(0deg);
+  to {
+    transform: rotate(360deg);
   }
 }
 
-.post-card {
-  /* ... (previous styles remain the same) */
-  transition: transform 0.5s ease-in-out;
+.rotating {
+  animation: rotate 1s ease-in-out;
 }
-
-.post-card.rotating {
-  animation: rotate 5s ease-in-out;
-}
-
-/* ... (rest of the styles remain the same) */
