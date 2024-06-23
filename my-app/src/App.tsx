@@ -229,6 +229,7 @@ const App: React.FC = () => {
             onChange={(e) => setNickname(e.target.value)}
             className="auth-input"/>
           <button onClick={(e) => { createRipple(e); handleLogin(); }} className="auth-button">ログインするで〜</button>
+          <button onClick={(e) => { createRipple(e); handleSignUp(); }} className="auth-button">新規登録するで〜</button>
         </div>
       ) : (
         <div className="content-container">
