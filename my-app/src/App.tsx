@@ -15,7 +15,6 @@ interface Post {
   is_reply: boolean;
   parent_id: string;
   parent_content?: string;
-  image_url?: string;
 }
 
 const App: React.FC = () => {
@@ -104,12 +103,13 @@ const App: React.FC = () => {
         return;
       }
 
+      const content = `${userPost.trim()} ${imageUrl.trim()}`;
+
       const response = await axios.post('https://uttc-hackathon3-lx5cqmshrq-uc.a.run.app/api/posts', {
         user_id: userID,
-        content: userPost.trim(),
+        content: content,
         is_reply: !!replyTo,
         parent_id: replyTo,
-        image_url: imageUrl.trim(),
       });
       console.log("Post created");
 
@@ -171,7 +171,7 @@ const App: React.FC = () => {
 
   return (
     <div className="app">
-      <h1 className="app-title">ツイッターがぞうとーこー</h1>
+      <h1 className="app-title">ツイッターがぞうとうこう</h1>
       {error && <p className="error-message">{error}</p>}
       {!loggedIn ? (
         <div className="auth-container">
@@ -224,8 +224,8 @@ const App: React.FC = () => {
                   </div>
                 )}
                 <ReactMarkdown className="post-content">{post.content}</ReactMarkdown>
-                {post.image_url && (
-                  <img src={post.image_url} alt="Post image" className="post-image" />
+                {post.content.match(/https?:\/\/[^\s]+/g) && (
+                  <img src={post.content.match(/https?:\/\/[^\s]+/g)![0]} alt="Post image" className="post-image" />
                 )}
                 <div className="post-actions">
                   <button className="action-button" onClick={() => setReplyTo(post.id)}>
