@@ -136,7 +136,7 @@ const App: React.FC = () => {
       const response = await axios.get('https://uttc-hackathon3-lx5cqmshrq-uc.a.run.app/api/posts');
       const postsWithJST = response.data.map((post: Post) => ({
         ...post,
-        created_at: formatToJST(post.created_at)
+        created_at: new Date(post.created_at).toISOString() 
       }));
       setPosts(postsWithJST);
     } catch (error) {
@@ -198,10 +198,12 @@ const App: React.FC = () => {
     const date = new Date(dateString);
     return date.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
   };
+  
 
   return (
     <div className="app">
-      <h1 className="app-title">ツイッター！日本標準時！</h1>
+      <h1 className="app-title">ゆるメディア
+      </h1>
       {error && <p className="error-message">{error}</p>}
       {!loggedIn ? (
         <div className="auth-container">
