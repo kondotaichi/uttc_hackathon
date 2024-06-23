@@ -233,18 +233,18 @@ const App: React.FC = () => {
         <div className="content-container">
           {replyTo === null && (
             <div className="post-form">
-              <button onClick={(e) => { createRipple(e); handleLogout(); }} className="logout-button">Logout</button>
+              <button onClick={(e) => { createRipple(e); handleLogout(); }} className="logout-button">ログアウト</button>
               <textarea
                 value={userPost}
                 onChange={(e) => setUserPost(e.target.value)}
-                placeholder="What's happening? (Markdown supported)"
+                placeholder="どないしたん？"
                 className="post-textarea"
               />
               <input
                 type="text"
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="Image URL (optional)"
+                placeholder="画像いれたかったらURL貼ってな！"
                 className="image-url-input"
               />
               <button onClick={(e) => { createRipple(e); makePost(); }} className="post-button">Post</button>
@@ -267,10 +267,10 @@ const App: React.FC = () => {
                 )}
                 <div className="post-actions">
                   <button className="action-button" onClick={() => setReplyTo(post.id)}>
-                    Reply
+                    返信せい！
                   </button>
                   <button className="action-button" onClick={() => makeLike(post.id)}>
-                    Like
+                    ええやん！
                   </button>
                 </div>
                 <div className="post-meta">
@@ -295,7 +295,7 @@ const App: React.FC = () => {
                       placeholder="Image URL (optional)"
                       className="image-url-input"
                     />
-                    <button onClick={makePost} className="reply-button">Reply</button>
+                    <button onClick={makePost} className="reply-button">リプライ！</button>
                   </div>
                 )}
               </div>
