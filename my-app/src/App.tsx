@@ -219,6 +219,12 @@ const App: React.FC = () => {
             onChange={(e) => setPassword(e.target.value)}
             className="auth-input"
           />
+          <input
+            type="text"
+            placeholder="Nickname"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            className="auth-input"/>
           <button onClick={(e) => { createRipple(e); handleLogin(); }} className="auth-button">ログインするで〜</button>
         </div>
       ) : (
@@ -271,7 +277,7 @@ const App: React.FC = () => {
                   </small>
                   <p>Likes: {post.like_count}</p>
                 </div>
-                {showSmiley[post.id] && <div className="smiley">😊</div>}
+                {showSmiley[post.id] && <div className="hand-wave">👍</div>}
                 {replyTo === post.id && (
                   <div className="reply-form">
                     <textarea
