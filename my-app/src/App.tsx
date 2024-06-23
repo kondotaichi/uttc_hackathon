@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { fireAuth } from './firebase/firebase.js';
-import ReactMarkdown from 'react-markdown';
 import './styles.css';
 import { onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 
@@ -151,33 +150,13 @@ const App: React.FC = () => {
     }
   };
 
-  const createRipple = (event: React.MouseEvent<HTMLButtonElement>) => {
-    const button = event.currentTarget;
-    const circle = document.createElement('span');
-    const diameter = Math.max(button.clientWidth, button.clientHeight);
-    const radius = diameter / 2;
-
-    circle.style.width = circle.style.height = `${diameter}px`;
-    circle.style.left = `${event.clientX - button.offsetLeft - radius}px`;
-    circle.style.top = `${event.clientY - button.offsetTop - radius}px`;
-    circle.classList.add('ripple');
-
-    const ripple = button.getElementsByClassName('ripple')[0];
-
-    if (ripple) {
-      ripple.remove();
-    }
-
-    button.appendChild(circle);
-  };
-
   useEffect(() => {
     fetchPosts();
   }, []);
 
   return (
     <div className="app">
-      <h1>ついった</h1>
+      <h1>ツイッター風</h1>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       {!loggedIn ? (
         <div>
@@ -202,21 +181,21 @@ const App: React.FC = () => {
             onChange={(e) => setNickname(e.target.value)}
             className="textarea"
           />
-          <button onClick={(e) => {createRipple(e); handleSignUp(); }} className="button">Sign Up</button>
-          <button onClick={(e) => {createRipple(e); handleLogin(); }} className="button">Login</button>
+          <button onClick={handleSignUp} className="button">Sign Up</button>
+          <button onClick={handleLogin} className="button">Login</button>
         </div>
       ) : (
         <div>
           {replyTo === null && (
             <>
-              <button onClick={(e) => { createRipple(e); handleLogout(); }} className="button">Logout</button>
+              <button onClick={handleLogout} className="button">Logout</button>
               <textarea
                 value={userPost}
                 onChange={(e) => setUserPost(e.target.value)}
                 placeholder="What's happening?"
                 className="textarea"
               />
-              <button onClick={(e) => { createRipple(e); makePost(); }} className="button">Post</button>
+              <button onClick={makePost} className="button">Post</button>
             </>
           )}
           <div className="posts">
@@ -227,12 +206,12 @@ const App: React.FC = () => {
                     <p>Replying to: {post.parent_content}</p>
                   </div>
                 )}
-                <ReactMarkdown>{post.content}</ReactMarkdown>
+                <p>{post.content}</p>
                 <div className="button-group">
-                  <button className="button" onClick={(e) => {createRipple(e); setReplyTo(post.id); }}>
+                  <button className="button" onClick={() => setReplyTo(post.id)}>
                     リプライ
                   </button>
-                  <button className="button" onClick={(e) => {createRipple(e); makeLike(post.id); }}>
+                  <button className="button" onClick={() => makeLike(post.id)}>
                     ええやん！
                   </button>
                 </div>
@@ -249,7 +228,7 @@ const App: React.FC = () => {
                       placeholder="返信書けやこら"
                       className="textarea"
                     />
-                    <button onClick={(e) => { createRipple(e); makePost(); }} className="button">Reply</button>
+                    <button onClick={makePost} className="button">Reply</button>
                   </div>
                 )}
               </div>
@@ -259,4 +238,6 @@ const App: React.FC = () => {
       )}
     </div>
   );
-}
+};
+
+export default App;
