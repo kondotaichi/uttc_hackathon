@@ -201,7 +201,7 @@ const App: React.FC = () => {
 
   return (
     <div className="app">
-      <h1 className="app-title">ツイッター！日本標準時！ボタンも！</h1>
+      <h1 className="app-title">ツイッター！日本標準時！</h1>
       {error && <p className="error-message">{error}</p>}
       {!loggedIn ? (
         <div className="auth-container">
@@ -258,8 +258,10 @@ const App: React.FC = () => {
                   <img src={post.content.match(/https?:\/\/[^\s]+/g)![0]} alt="Post image" className="post-image" />
                 )}
                 <div className="post-actions">
-                <button onClick={(e) => { createRipple(e); setReplyTo(post.id); }} className="action-button">Reply</button>
-                <button onClick={(e) => { createRipple(e); makeLike(post.id); }} className="action-button">
+                  <button className="action-button" onClick={() => setReplyTo(post.id)}>
+                    Reply
+                  </button>
+                  <button className="action-button" onClick={() => makeLike(post.id)}>
                     Like
                   </button>
                 </div>
