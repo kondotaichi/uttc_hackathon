@@ -15,6 +15,7 @@ interface Post {
   is_reply: boolean;
   parent_id: string;
   parent_content?: string;
+  image_url?: string;
 }
 
 const App: React.FC = () => {
@@ -40,7 +41,6 @@ const App: React.FC = () => {
       }
     });
   }, []);
-
 
   const handleSignUp = async () => {
     try {
@@ -98,22 +98,18 @@ const App: React.FC = () => {
         return;
       }
       
-      let content = userPost.trim();
-      if (imageUrl.trim()) {
-        content += `\n\n![image](${imageUrl.trim()})`;
-      }
-      
-      if (!content) {
-        console.error('Post content is empty');
-        setError('Post content is empty. Please enter some content or provide an image URL.');
+      if (!userPost.trim() && !imageUrl.trim()) {
+        console.error('Post content and image URL are empty');
+        setError('Post content and image URL are empty. Please enter some content or provide an image URL.');
         return;
       }
 
       const response = await axios.post('https://uttc-hackathon3-lx5cqmshrq-uc.a.run.app/api/posts', {
         user_id: userID,
-        content: content,
+        content: userPost.trim(),
         is_reply: !!replyTo,
         parent_id: replyTo,
+        image_url: imageUrl.trim(),
       });
       console.log("Post created");
 
@@ -132,6 +128,17 @@ const App: React.FC = () => {
     } catch (error) {
       console.error('Error creating post:', error);
       setError('Error creating post. Please try again.');
+    }
+  };
+
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get('https://uttc-hackathon3-lx5cqmshrq-uc.a.run.app/api/posts');
+      // Assuming the API now returns image_url as part of each post
+      setPosts(response.data);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      setError('Error fetching posts. Please try again.');
     }
   };
 
@@ -159,23 +166,13 @@ const App: React.FC = () => {
     }
   };
 
-  const fetchPosts = async () => {
-    try {
-      const response = await axios.get('https://uttc-hackathon3-lx5cqmshrq-uc.a.run.app/api/posts');
-      setPosts(response.data);
-    } catch (error) {
-      console.error('Error fetching posts:', error);
-      setError('Error fetching posts. Please try again.');
-    }
-  };
-
   useEffect(() => {
     fetchPosts();
   }, []);
 
   return (
     <div className="app">
-      <h1 className="app-title">ツイッター!画像投稿できます！</h1>
+      <h1 className="app-title">ツイッターがぞうとうこう</h1>
       {error && <p className="error-message">{error}</p>}
       {!loggedIn ? (
         <div className="auth-container">
@@ -214,6 +211,9 @@ const App: React.FC = () => {
                   </div>
                 )}
                 <ReactMarkdown className="post-content">{post.content}</ReactMarkdown>
+                {post.image_url && (
+                  <img src={post.image_url} alt="Post image" className="post-image" />
+                )}
                 <div className="post-actions">
                   <button className="action-button" onClick={() => setReplyTo(post.id)}>
                     Reply

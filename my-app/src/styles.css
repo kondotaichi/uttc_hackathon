@@ -169,6 +169,13 @@
   animation: rotate 1s ease-in-out;
 }
 
+.post-image {
+  max-width: 100%;
+  height: auto;
+  margin-top: 10px;
+  border-radius: 8px;
+}
+
 .post-card {
   /* ... (previous styles remain the same) */
   transition: transform 0.5s ease-in-out;
