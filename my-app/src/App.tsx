@@ -134,7 +134,11 @@ const App: React.FC = () => {
   const fetchPosts = async () => {
     try {
       const response = await axios.get('https://uttc-hackathon3-lx5cqmshrq-uc.a.run.app/api/posts');
-      setPosts(response.data);
+      const postsWithJST = response.data.map((post: Post) => ({
+        ...post,
+        created_at: formatToJST(post.created_at)
+      }));
+      setPosts(postsWithJST);
     } catch (error) {
       console.error('Error fetching posts:', error);
       setError('Error fetching posts. Please try again.');
@@ -176,7 +180,7 @@ const App: React.FC = () => {
 
   return (
     <div className="app">
-      <h1 className="app-title">ツイッターがぞうとうこう</h1>
+      <h1 className="app-title">ツイッター！日本標準時！</h1>
       {error && <p className="error-message">{error}</p>}
       {!loggedIn ? (
         <div className="auth-container">
@@ -242,7 +246,7 @@ const App: React.FC = () => {
                 </div>
                 <div className="post-meta">
                   <small>
-                    Posted by {post.nickname} at {formatToJST(post.created_at)}
+                    Posted by {post.nickname} at {post.created_at}
                   </small>
                   <p>Likes: {post.like_count}</p>
                 </div>
