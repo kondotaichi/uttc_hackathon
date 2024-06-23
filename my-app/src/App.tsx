@@ -27,8 +27,8 @@ const App: React.FC = () => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userID, setUserID] = useState<string | null>(null);
-  const [rotatingPosts, setRotatingPosts] = useState<string[]>([]);
   const [showSmiley, setShowSmiley] = useState<{ [key: string]: boolean }>({});
+  const [rotatingPosts, setRotatingPosts] = useState<string[]>([]);
 
   useEffect(() => {
     onAuthStateChanged(fireAuth, async (user) => {
@@ -212,7 +212,10 @@ const App: React.FC = () => {
           )}
           <div className="posts-container">
             {posts.map((post) => (
-              <div key={post.id} className="post-card">
+              <div 
+                key={post.id} 
+                className={`post-card ${rotatingPosts.includes(post.id) ? 'rotating' : ''}`}
+              >
                 {post.is_reply && post.parent_content && (
                   <div className="parent-post">
                     <p>Replying to: <ReactMarkdown>{post.parent_content}</ReactMarkdown></p>
