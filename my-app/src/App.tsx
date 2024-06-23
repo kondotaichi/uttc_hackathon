@@ -145,6 +145,27 @@ const App: React.FC = () => {
     }
   };
 
+  const createRipple = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const button = event.currentTarget;
+    const circle = document.createElement('span');
+    const diameter = Math.max(button.clientWidth, button.clientHeight);
+    const radius = diameter / 2;
+  
+    circle.style.width = circle.style.height = `${diameter}px`;
+    circle.style.left = `${event.clientX - button.offsetLeft - radius}px`;
+    circle.style.top = `${event.clientY - button.offsetTop - radius}px`;
+    circle.classList.add('ripple');
+  
+    const ripple = button.getElementsByClassName('ripple')[0];
+  
+    if (ripple) {
+      ripple.remove();
+    }
+  
+    button.appendChild(circle);
+  };
+  
+
   const makeLike = async (postID: string) => {
     try {
       if (!userID) {
@@ -180,7 +201,7 @@ const App: React.FC = () => {
 
   return (
     <div className="app">
-      <h1 className="app-title">ツイッター！日本標準時！</h1>
+      <h1 className="app-title">ツイッター！日本標準時！ボタンも！</h1>
       {error && <p className="error-message">{error}</p>}
       {!loggedIn ? (
         <div className="auth-container">
@@ -198,13 +219,13 @@ const App: React.FC = () => {
             onChange={(e) => setPassword(e.target.value)}
             className="auth-input"
           />
-          <button onClick={handleLogin} className="auth-button">ログインするで〜</button>
+          <button onClick={(e) => { createRipple(e); handleLogin(); }} className="auth-button">ログインするで〜</button>
         </div>
       ) : (
         <div className="content-container">
           {replyTo === null && (
             <div className="post-form">
-              <button onClick={handleLogout} className="logout-button">Logout</button>
+              <button onClick={(e) => { createRipple(e); handleLogout(); }} className="logout-button">Logout</button>
               <textarea
                 value={userPost}
                 onChange={(e) => setUserPost(e.target.value)}
@@ -218,7 +239,7 @@ const App: React.FC = () => {
                 placeholder="Image URL (optional)"
                 className="image-url-input"
               />
-              <button onClick={makePost} className="post-button">Post</button>
+              <button onClick={(e) => { createRipple(e); makePost(); }} className="post-button">Post</button>
             </div>
           )}
           <div className="posts-container">
@@ -237,16 +258,14 @@ const App: React.FC = () => {
                   <img src={post.content.match(/https?:\/\/[^\s]+/g)![0]} alt="Post image" className="post-image" />
                 )}
                 <div className="post-actions">
-                  <button className="action-button" onClick={() => setReplyTo(post.id)}>
-                    Reply
-                  </button>
-                  <button className="action-button" onClick={() => makeLike(post.id)}>
+                <button onClick={(e) => { createRipple(e); setReplyTo(post.id); }} className="action-button">Reply</button>
+                <button onClick={(e) => { createRipple(e); makeLike(post.id); }} className="action-button">
                     Like
                   </button>
                 </div>
                 <div className="post-meta">
                   <small>
-                    Posted by {post.nickname} at {post.created_at}
+                    Posted by {post.nickname} at {formatToJST(post.created_at)}
                   </small>
                   <p>Likes: {post.like_count}</p>
                 </div>
