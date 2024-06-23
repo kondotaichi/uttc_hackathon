@@ -279,7 +279,7 @@ const App: React.FC = () => {
                   <small>
                     Posted by {post.nickname} at {formatToJST(post.created_at)}
                   </small>
-                  <p>Likes: {post.like_count}</p>
+                  <p>お前のいいねはこんなもん: {post.like_count}</p>
                 </div>
                 {showSmiley[post.id] && <div className="hand-wave">👍</div>}
                 {replyTo === post.id && (
