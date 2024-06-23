@@ -106,6 +106,16 @@
   padding: 15px;
   background-color: #f9f9f9;
 }
+.image-url-input {
+  width: 100%; /* 入力欄の幅を100%に設定 */
+  padding: 10px; /* パディングを追加して、入力欄の内部の余白を増やす */
+  margin-bottom: 15px; /* 下に余白を追加 */
+  border: 1px solid #ccc; /* ボーダーのスタイルを設定 */
+  border-radius: 5px; /* 角を丸くする */
+  font-size: 14px; /* フォントサイズを設定 */
+  box-sizing: border-box; /* パディングとボーダーを含むように設定 */
+}
+
 
 .parent-post {
   background-color: #e9e9e9;
