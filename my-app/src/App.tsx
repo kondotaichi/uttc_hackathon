@@ -134,7 +134,6 @@ const App: React.FC = () => {
   const fetchPosts = async () => {
     try {
       const response = await axios.get('https://uttc-hackathon3-lx5cqmshrq-uc.a.run.app/api/posts');
-      // Assuming the API now returns image_url as part of each post
       setPosts(response.data);
     } catch (error) {
       console.error('Error fetching posts:', error);
@@ -172,11 +171,25 @@ const App: React.FC = () => {
 
   return (
     <div className="app">
-      <h1 className="app-title">ツイッターがぞうとうこう</h1>
+      <h1 className="app-title">ツイッターがぞうとーこー</h1>
       {error && <p className="error-message">{error}</p>}
       {!loggedIn ? (
         <div className="auth-container">
-          {/* Authentication inputs remain unchanged */}
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="auth-input"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="auth-input"
+          />
+          <button onClick={handleLogin} className="auth-button">ログインするで〜</button>
         </div>
       ) : (
         <div className="content-container">
