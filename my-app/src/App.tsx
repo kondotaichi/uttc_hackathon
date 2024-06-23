@@ -196,6 +196,7 @@ const App: React.FC = () => {
 
   const formatToJST = (dateString: string) => {
     const date = new Date(dateString);
+    date.setHours(date.getHours() + 9); // 日本標準時に変換
     return date.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
   };
   
@@ -258,7 +259,7 @@ const App: React.FC = () => {
               >
                 {post.is_reply && post.parent_content && (
                   <div className="parent-post">
-                    <p>Replying to: <ReactMarkdown>{post.parent_content}</ReactMarkdown></p>
+                    <p>返信先: <ReactMarkdown>{post.parent_content}</ReactMarkdown></p>
                   </div>
                 )}
                 <ReactMarkdown className="post-content">{post.content}</ReactMarkdown>
